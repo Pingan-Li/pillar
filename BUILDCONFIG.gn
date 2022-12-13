@@ -1,0 +1,39 @@
+declare_args() {
+  # gcc or clang
+  cc = "gcc"
+
+  # g++ or clang++
+  cxx = "g++"
+
+  # C language version, e.g. c17
+  std_c = "c17"
+
+  # C++ language version, e.g. c++17
+  std_cxx = "c++17"
+
+  # debug or release
+  build_type = "debug"
+}
+
+# toolchain
+if (host_os == "mac") {
+  set_default_toolchain("//toolchain/macos:clang")
+} else if (host_os == "linux") {
+  set_default_toolchain("//toolchain/linux:cxx")
+}
+
+# compile configuration
+set_defaults("executable") {
+  configs = [ "//toolchain:compiler_config" ]
+  configs += [ "//:executable_config" ]
+}
+
+set_defaults("shared_library") {
+  configs = [ "//toolchain:compiler_config" ]
+  configs += [ "//:shared_library_config" ]
+}
+
+set_defaults("static_library") {
+  configs = [ "//toolchain:compiler_config" ]
+  configs += [ "//:static_libaray_config" ]
+}
