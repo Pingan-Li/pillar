@@ -199,16 +199,24 @@ TEST(FuncotrTraits, MemberFunction_6) {
 
 // lamda has type (::*)(...) const
 TEST(FuncotrTraits, Lambda_0) {
-  auto f = [](int a, int b) { return a + b; };
+  auto f = [](int a, int b) -> int { return a + b; };
   auto result = Call(f, 4, 3);
   ASSERT_EQ(result, 7);
   ASSERT_TRUE((std::is_same<decltype(result), int>::value));
 }
 
 TEST(FuncotrTraits, Lambda_1) {
-  auto f1 = [](int a, int b) { return a + b; };
-  auto f2 = [](int a, int b) { return a + b; };
+  auto f1 = [](int a, int b) -> int { return a + b; };
+  auto f2 = [](int a, int b) -> int { return a + b; };
   ASSERT_FALSE((std::is_same<decltype(f1), decltype(f2)>::value));
+}
+
+TEST(FuncotrTraits, Lambda_2) {
+  auto f1 = [](int a, int b) -> int { return a + b; };
+  auto f2 = f1;
+  int result1 = f1(1, 2);
+  int result2 = f2(1, 2);
+  ASSERT_EQ(result1, result2);
 }
 
 class AnyFuncotr {
@@ -222,4 +230,26 @@ TEST(FuncotrTraits, Functor_0) {
   ASSERT_EQ(result, 7);
   ASSERT_TRUE((std::is_same<decltype(result), int>::value));
 }
+
+void fun() {}
+
+TEST(FuncotrTraits, Decay) {
+  // all decay to function pointer.
+  ASSERT_TRUE((std::is_same<void (*)(), std::decay<void()>::type>::value));
+  ASSERT_TRUE((std::is_same<void (*)(), std::decay<void (*)()>::type>::value));
+  ASSERT_TRUE((std::is_same<void (*)(), std::decay<void (&)()>::type>::value));
+  ASSERT_TRUE((std::is_same<void (*)(), std::decay<void(&&)()>::type>::value));
+  // good!
+  void (*ptr0)() = &fun;
+  (void)ptr0;
+  void (*ptr1)() = fun;
+  (void)ptr1;
+  auto &lref = fun;
+  void (*ptr2)() = lref;
+  (void)ptr2;
+  auto &&rref = fun;
+  void (*ptr3)() = rref;
+  (void)ptr3;
+}
+
 } // namespace pillar
